@@ -1,8 +1,8 @@
 # Link to problem statement:
 # https://leetcode.com/problems/average-of-levels-in-binary-tree/
 
-# Note: The solution below does not work for all the testcases.
-# I will continue working on it.
+# Note: This is the second version of my solution.  It works for
+#       all test cases that were run on Leetcode.
 
 # Definition for a binary tree node.
 # class TreeNode:
@@ -10,37 +10,25 @@
 #         self.val = val
 #         self.left = left
 #         self.right = right
+
 class Solution:
     def averageOfLevels(self, root: Optional[TreeNode]) -> List[float]:
-        # traverse tree breadth-first fashion and store node values in a list
-        level = 0
-        avgs = []
-        que = [root]
-        within_lvl_count = 0
-        within_lvl_sum = 0
-        within_lvl_non_null = 0
+        # traverse tree breadth-first fashion and store nodes of each level in a list
+        que= [root]
+        vals = []
+        # check that the node list is not all nulls
         while any([True for x in que if x is not None]):
-            node = que.pop(0)
-            within_lvl_count += 1
+             subvals = []
+             new_nodes = []
+             for nd in que:
+                 if nd is not None:
+                     subvals.append(nd.val)
+                     new_nodes.append(nd.left)
+                     new_nodes.append(nd.right)
 
-            if node is not None:
-               que.append(node.left)
-               que.append(node.right)
-            if node is not None:
-               within_lvl_sum += node.val
-               within_lvl_non_null += 1
+             vals.append(subvals)
+             que = new_nodes
 
-            if within_lvl_count == 2**level:              
-                avg = within_lvl_sum/within_lvl_non_null
-                avgs.append(avg)
-                # reset within_level_counter and level tracker
-                level += 1
-                within_lvl_sum = 0
-                within_lvl_count = 0
-                within_lvl_non_null = 0
-        
-        if (within_lvl_count < 2**level) and (within_lvl_non_null > 0):
-            avg = within_lvl_sum/within_lvl_non_null
-            avgs.append(avg)
-
+        avgs = [ sum(ll)/len(ll) for ll in vals]
         return avgs
+    
