@@ -2,20 +2,31 @@
 # Problem description:
 # https://leetcode.com/problems/triangle/
 
-# This is a preliminary version of the solution.
-# It does not work for all of the test cases.
-# Will try dynamic programming version for next version.
+# This is the second version of my solution.
+# This version passes all test cases.
+
 
 class Solution:
     def minimumTotal(self, triangle: List[List[int]]) -> int:
-        min_path = triangle[0][0]
-        ind = 0
-        for row in triangle[1:]:
-            if row[ind] > row[ind+1]:
-                min_path += row[ind+1]
-                ind += 1
-            else:
-                min_path += row[ind]
-        return min_path
 
+        if len(triangle)==1:
+            return triangle[0][0]
+
+        # get the path sums for the second row
+        triangle[1][0] += triangle[0][0]
+        triangle[1][1] += triangle[0][0]
+
+        for i in range(2, len(triangle)):  # iterate through rows
+            for j in range(len(triangle[i])):  # iterate thru cols in the row
+                if j==0:
+                    triangle[i][j] += triangle[i-1][0]
+                elif j==len(triangle[i])-1:
+                    triangle[i][j] += triangle[i-1][j-1]
+                else:
+                    triangle[i][j] += min(triangle[i-1][j-1], triangle[i-1][j] )
+
+        min_path = min( triangle[-1] )
+
+        return min_path
+    
 
