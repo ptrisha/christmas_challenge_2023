@@ -2,12 +2,12 @@
 # Problem description:
 # https://leetcode.com/problems/longest-consecutive-sequence
 
-# This version exceeds the time limit set by Leetcode for at least
-# one of the test cases.  A faster version will be committed soon.
+# This is my second version, implemented with the help of a hint from the
+# Leetcode discussion forum.  The submission did not exceed memory or time
+# limits, but in comparison with other Python solutions submitted on Leetcode,
+# this version is relative slow and inefficient in terms of memory.
 
 class Solution:
-
-    #import bitarray
 
     def longestConsecutive(self, nums: List[int]) -> int:
         if not nums:
@@ -16,37 +16,21 @@ class Solution:
             return 1
 
         min_num = min(nums)
-        max_num = max(nums)
+        #max_num = max(nums)
 
-        # declare a True/False array for consecutive numbers ranging from
-        # min_num to max_num
-        #bits = [False]*(max_num-min_num+1)
-        #bits = bitarray(max_num-min_num+1)
-        #bits.setall(0)
-        bits = 0 << (max_num-min_num+1)
-
-        # for each number, mark its bit True in bits
+        nums_set = set(nums)
+        max_len = -1
+        
         for num in nums:
-            indx = num - min_num
-            #bits[indx] = True
-            bits = ( bits | 1<<(indx+1) )
-
-        #print(bits)
-
-        # loop thru bits and compute lengths of subsequences
-        max_len = 0
-        curr_len = 0
-        mask = 1
-        for i in range(max_num-min_num+1):
-            mask = mask << 1
-            #if bits[i]:   # current bit is True
-            if bits & mask:
-               curr_len += 1
-            else:              
-               max_len = max(curr_len, max_len)
-               curr_len = 0
-
-        max_len = max(curr_len, max_len)
+            # determine if num is the possible start of a subsequence
+            if (num==min_num) or ((num-1) not in nums_set):
+                # find the length of the subsequence
+                curr_len = 1
+                while ((num+curr_len) in nums_set):
+                    curr_len += 1
+                # update max_len
+                if curr_len > max_len:
+                    max_len = curr_len
 
         return max_len
     
