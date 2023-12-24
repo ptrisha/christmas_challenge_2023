@@ -2,11 +2,8 @@
 # Problem description:
 # https://leetcode.com/problems/sort-list
 
-# This is the second version.  It passes 28 of the testcases, but
-# encountered a TLE on a test in which the linked list contains 50000
-# items in descending order from 50000 downto 1.
-# For the next version, I will attempt a recursive algorithm such as
-# merge sort.
+# This is my third version.  It passes all of the tests on Leetcode submission.
+# This implementation is just mergesort, complexity is O(n log n).
 
 
 # Definition for singly-linked list.
@@ -17,76 +14,53 @@
 class Solution:
     def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
 
-        def searchInsert(nums: List[int], target: int) -> int:
-            low = 0
-            high = len(nums) - 1
-            while low <= high:
-                mid = (low + high)//2
-                if target > nums[mid]:
-                    low = mid + 1
-                elif target < nums[mid]:
-                    high = mid - 1
+        def getMiddle(head: Optional[ListNode]) -> Optional[ListNode]:
+            mid = head
+            tail = head.next
+            while tail:
+                 tail = tail.next
+                 if tail:
+                     mid = mid.next
+                     tail = tail.next
+                
+            return mid
+
+        def mergeSubLists(head1: Optional[ListNode], head2: Optional[ListNode])->Optional[ListNode]:
+
+            new_head = ListNode()
+            tail = new_head
+            list1 = head1
+            list2 = head2
+            while (list1) and (list2):
+                if list1.val <= list2.val:
+                    tail.next = list1
+                    list1 = list1.next
                 else:
-                    return mid
+                    tail.next = list2
+                    list2 = list2.next
+                tail = tail.next
 
-            if target > nums[mid]:
-                return mid+1
-            else:
-                if mid > 0:
-                    return mid
-                else:
-                    return 0
-        
+            if list1:
+                tail.next = list1
+            elif list2:
+                tail.next = list2
 
-        if head is None:
-            return None
+            return new_head.next
 
-        if head.next is None:
-            return head
+        if (head is None) or (head.next is None):
+           return head
 
-        # keep a list of the last node of subsequence with the same node val
-        lastNodeList = [head]
-        valList = [head.val]
+        # find the middle node in the linked list 
+        mid = getMiddle(head)
+        # split the list in 2 with mid node as the last node of the 1st list
+        head1 = head
+        head2 = mid.next
+        mid.next = None
 
-        headNode = head
-        nextNode = head.next
-        while nextNode:
-            currNode = nextNode
-            nextNode = currNode.next
-            currVal = currNode.val
-            if currVal in valList:
-                valIndx = valList.index(currVal)
-                lastNodeSameVal = lastNodeList[valIndx]
-                currNode.next = lastNodeSameVal.next
-                lastNodeSameVal.next = currNode
-                lastNodeList[valIndx] = currNode
-            else:   # search and insert 
-                if (currVal-1) in valList:
-                    pos = valList.index(currVal-1) + 1
-                elif (currVal+1) in valList:
-                    pos = valList.index(currVal+1)
-                else:
-                    pos = searchInsert(valList, currVal)
-                    
-                #print(f"Pos for inserting currVal:{currVal} is {pos}")
-                # insert the new val in valList
-                valList.insert(pos, currVal)
-                # insert the node
-                lastNodeList.insert(pos, currNode)
-                # adjust adjacent pointers
+        sorted1_head = self.sortList( head1)
+        sorted2_head = self.sortList( head2)
 
-                if pos == 0:
-                    currNode.next = headNode
-                    headNode = currNode
-                    lastNodeList[-1].next = None
-                elif pos == len(valList) - 1:
-                    lastNodeList[pos-1].next = currNode
-                    currNode.next = None
-                else:
-                    currNode.next = lastNodeList[pos-1].next
-                    lastNodeList[pos-1].next = currNode
+        sorted_head = mergeSubLists(sorted1_head, sorted2_head)
 
-
-        return headNode
+        return sorted_head
     
-
