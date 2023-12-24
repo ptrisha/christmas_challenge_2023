@@ -2,8 +2,11 @@
 # Problem description:
 # https://leetcode.com/problems/sort-list
 
-# Preliminary version that sort of works, but with time limit exceeded
-# for at least one of the submission test cases.
+# This is the second version.  It passes 28 of the testcases, but
+# encountered a TLE on a test in which the linked list contains 50000
+# items in descending order from 50000 downto 1.
+# For the next version, I will attempt a recursive algorithm such as
+# merge sort.
 
 
 # Definition for singly-linked list.
@@ -14,85 +17,76 @@
 class Solution:
     def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
 
-       def _getNode(headNode: ListNode, numMoves: int) -> ListNode:
-           nextNode = headNode
-           for i in range(numMoves-1):
-               nextNode = nextNode.next
-           return nextNode
-
-       
-       def _searchInsert(sorted_length, headNode: ListNode, targetNode: ListNode) -> ListNode:
-       
-            targetVal = targetNode.val
-            lastSortedNode = _getNode(headNode, sorted_length)
-
-            if targetVal <= headNode.val:
-                lastSortedNode.next = targetNode.next
-                targetNode.next = headNode
-                headNode = targetNode
-                return headNode
-
-            if targetVal >= lastSortedNode.val:
-                return headNode
-
+        def searchInsert(nums: List[int], target: int) -> int:
             low = 0
-            high = sorted_length - 1
-            midVal = 0
+            high = len(nums) - 1
             while low <= high:
                 mid = (low + high)//2
-                midVal = _getNode(headNode, mid).val
-                if targetVal > midVal:
+                if target > nums[mid]:
                     low = mid + 1
-                elif targetVal < midVal:
+                elif target < nums[mid]:
                     high = mid - 1
                 else:
-                    break
+                    return mid
 
-            
-            
-            if targetVal > midVal:
-                prevNode = _getNode(headNode, mid)
+            if target > nums[mid]:
+                return mid+1
             else:
-                prevNode = _getNode(headNode, mid-1)
+                if mid > 0:
+                    return mid
+                else:
+                    return 0
+        
 
-            # insert the target node
-            lastSortedNode.next = targetNode.next
-            targetNode.next = prevNode.next
-            prevNode.next = targetNode
+        if head is None:
+            return None
 
-            return headNode
+        if head.next is None:
+            return head
 
-            
-       headNode = head
+        # keep a list of the last node of subsequence with the same node val
+        lastNodeList = [head]
+        valList = [head.val]
 
-       if not head:
-           return None
-      
-       # sort the first 2 nodes
-       if headNode.next:
-           val1 = headNode.val
-           val2 = headNode.next.val
-           node2 = headNode.next
-           if val2 < val1:   # swap positions
-              headNode.next = node2.next
-              node2.next = headNode
-              headNode = node2
-              print("Swap positions 1 and 2")
-              print(f"Head node val: {headNode.val}")
-              print(f"2nd node val: {headNode.next.val}")
-       else:
-            return headNode
+        headNode = head
+        nextNode = head.next
+        while nextNode:
+            currNode = nextNode
+            nextNode = currNode.next
+            currVal = currNode.val
+            if currVal in valList:
+                valIndx = valList.index(currVal)
+                lastNodeSameVal = lastNodeList[valIndx]
+                currNode.next = lastNodeSameVal.next
+                lastNodeSameVal.next = currNode
+                lastNodeList[valIndx] = currNode
+            else:   # search and insert 
+                if (currVal-1) in valList:
+                    pos = valList.index(currVal-1) + 1
+                elif (currVal+1) in valList:
+                    pos = valList.index(currVal+1)
+                else:
+                    pos = searchInsert(valList, currVal)
+                    
+                #print(f"Pos for inserting currVal:{currVal} is {pos}")
+                # insert the new val in valList
+                valList.insert(pos, currVal)
+                # insert the node
+                lastNodeList.insert(pos, currNode)
+                # adjust adjacent pointers
 
-       nextNode = headNode.next.next
-       sorted_length = 2
-       currNode = None
-       while nextNode:
-             currNode = nextNode
-             nextNode = currNode.next
-             headNode = _searchInsert(sorted_length, headNode, currNode)
-             sorted_length += 1
+                if pos == 0:
+                    currNode.next = headNode
+                    headNode = currNode
+                    lastNodeList[-1].next = None
+                elif pos == len(valList) - 1:
+                    lastNodeList[pos-1].next = currNode
+                    currNode.next = None
+                else:
+                    currNode.next = lastNodeList[pos-1].next
+                    lastNodeList[pos-1].next = currNode
 
 
-
-       return headNode
+        return headNode
     
+
