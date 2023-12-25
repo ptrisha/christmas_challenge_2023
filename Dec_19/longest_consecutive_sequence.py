@@ -5,7 +5,7 @@
 # This is my second version, implemented with the help of a hint from the
 # Leetcode discussion forum.  The submission did not exceed memory or time
 # limits, but in comparison with other Python solutions submitted on Leetcode,
-# this version is relative slow and inefficient in terms of memory.
+# this version is relatively slow, and inefficient in terms of memory.
 
 class Solution:
 
